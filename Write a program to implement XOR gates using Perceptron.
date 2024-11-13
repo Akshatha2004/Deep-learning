@@ -1,0 +1,91 @@
+import numpy as np
+
+# Define the Unit Step Function
+def unitStep(v):
+    """Unit step function returns 1 for non-negative inputs, else 0."""
+    return 1 if v >= 0 else 0
+
+# Design perceptron Model
+def perceptronModel(x, w, b):
+    """Perceptron model computes the output given inputs, weights, and bias."""
+    v = np.dot(w, x) + b
+    y = unitStep(v)
+    return y
+
+# Define Logic Functions
+def NOT_logicFunction(x):
+    """NOT logic function with weights and bias."""
+    wNOT = np.array([-1])  # Weights for the NOT gate
+    bNOT = 0.5            # Bias for the NOT gate
+    return perceptronModel(x, wNOT, bNOT)
+
+def AND_logicFunction(x):
+    """AND logic function with weights and bias."""
+    wAND = np.array([1, 1])  # Weights for the AND gate
+    bAND = -1.5              # Bias for the AND gate
+    return perceptronModel(x, wAND, bAND)
+
+def OR_logicFunction(x):
+    """OR logic function with weights and bias."""
+    wOR = np.array([1, 1])  # Weights for the OR gate
+    bOR = -0.5              # Bias for the OR gate
+    return perceptronModel(x, wOR, bOR)
+
+def NAND_logicFunction(x):
+    """NAND logic function with weights and bias."""
+    wNAND = np.array([-1, -1])  # Weights for the NAND gate
+    bNAND = 1.5                 # Bias for the NAND gate
+    return perceptronModel(x, wNAND, bNAND)
+
+def XOR_logicFunction(x):
+    """XOR logic function implemented using AND, OR, and NOT gates."""
+    y1 = AND_logicFunction(x)    # AND part
+    y2 = OR_logicFunction(x)     # OR part
+    y3 = NOT_logicFunction(y1)   # NOT of AND part
+    final_x = np.array([y2, y3])  # Combine OR and NOT(AND)
+    finalOutput = AND_logicFunction(final_x)  # Final AND for XOR output
+    return finalOutput
+
+# Additional Gate (NOR Gate) - As an example of extending the functionality
+def NOR_logicFunction(x):
+    """NOR logic function implemented using OR and NOT gates."""
+    y = OR_logicFunction(x)
+    return NOT_logicFunction(y)  # NOR is NOT(OR)
+
+# Testing the perceptron model with different logic functions
+test_cases = [
+    (np.array([0, 1]), "XOR"),
+    (np.array([1, 1]), "XOR"),
+    (np.array([0, 0]), "XOR"),
+    (np.array([1, 0]), "XOR"),
+    (np.array([0, 0]), "AND"),
+    (np.array([1, 0]), "AND"),
+    (np.array([0, 1]), "AND"),
+    (np.array([1, 1]), "AND"),
+    (np.array([0, 0]), "OR"),
+    (np.array([1, 1]), "OR"),
+    (np.array([0, 1]), "OR"),
+    (np.array([1, 0]), "OR"),
+    (np.array([0, 0]), "NAND"),
+    (np.array([1, 0]), "NAND"),
+    (np.array([0, 1]), "NAND"),
+    (np.array([1, 1]), "NAND"),
+    (np.array([0, 1]), "NOR"),
+    (np.array([1, 1]), "NOR")
+]
+
+# Run the test cases and print results
+for inputs, gate in test_cases:
+    if gate == "XOR":
+        result = XOR_logicFunction(inputs)
+    elif gate == "AND":
+        result = AND_logicFunction(inputs)
+    elif gate == "OR":
+        result = OR_logicFunction(inputs)
+    elif gate == "NAND":
+        result = NAND_logicFunction(inputs)
+    elif gate == "NOR":
+        result = NOR_logicFunction(inputs)
+
+    # Output the results
+    print(f"{gate}({inputs[0]},{inputs[1]}) = {result}")
