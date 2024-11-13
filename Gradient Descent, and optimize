@@ -1,0 +1,71 @@
+#import tensorflow as tf
+from tensorflow.keras import layers, models, optimizers
+import numpy as np
+import matplotlib.pyplot as plt
+
+# 1. Create synthetic data
+def create_data():
+    X = np.random.randn(1000, 10)  # 1000 samples, 10 features
+    y = np.random.randn(1000, 1)   # 1000 samples, 1 target (regression task)
+    return X, y
+
+# 2. Define a simple deep neural network
+def create_model():
+    model = models.Sequential([
+        layers.Dense(50, activation='relu', input_shape=(10,)),  # input layer with 10 features, 50 neurons
+        layers.Dense(20, activation='relu'),  # hidden layer with 20 neurons
+        layers.Dense(1)  # output layer (regression, single output)
+    ])
+    return model
+
+# 3. Train and capture loss values, showing the loss per epoch
+# Modification: Train the model once for all epochs and capture the loss
+def train_model_with_history(model, optimizer, X, y, batch_size, epochs, optimizer_name):
+    model.compile(optimizer=optimizer, loss='mean_squared_error')
+    
+    # Train the model once for all epochs and capture the loss values
+    history = model.fit(X, y, batch_size=batch_size, epochs=epochs, verbose=0)
+    
+    print(f"\nTraining with {optimizer_name} optimizer:")
+    
+    # Return the loss values for plotting
+    return history.history['loss']
+
+# 4. Compare performance of SGD, Adam, and RMSprop
+X, y = create_data()
+
+# Create models for SGD, Adam, and RMSprop
+model_sgd = create_model()
+model_adam = create_model()
+model_rmsprop = create_model()
+
+# Optimizers
+optimizer_sgd = optimizers.SGD(learning_rate=0.01)
+optimizer_adam = optimizers.Adam(learning_rate=0.001)
+optimizer_rmsprop = optimizers.RMSprop(learning_rate=0.001)  # Added RMSprop optimizer
+
+epochs = 50
+batch_size = 32
+
+# Training with SGD optimizer
+sgd_loss = train_model_with_history(model_sgd, optimizer_sgd, X, y, batch_size, epochs, 'SGD')
+
+# Training with Adam optimizer
+adam_loss = train_model_with_history(model_adam, optimizer_adam, X, y, batch_size, epochs, 'Adam')
+
+# Training with RMSprop optimizer
+rmsprop_loss = train_model_with_history(model_rmsprop, optimizer_rmsprop, X, y, batch_size, epochs, 'RMSprop')  # Added training for RMSprop
+
+# 5. Plot the loss curves for comparison
+# Modification: Added markers for better visualization
+plt.plot(range(1, epochs + 1), sgd_loss, label='SGD', color='blue', marker='o', markersize=5, linestyle='-')  # Added markers
+plt.plot(range(1, epochs + 1), adam_loss, label='Adam', color='orange', marker='x', markersize=5, linestyle='-')  # Added markers
+plt.plot(range(1, epochs + 1), rmsprop_loss, label='RMSprop', color='green', marker='s', markersize=5, linestyle='-')  # Added RMSprop plot with markers
+
+plt.xlabel('Epochs')
+plt.ylabel('Loss')
+plt.title('Comparison of Optimizers: SGD, Adam, RMSprop')
+plt.legend()
+plt.grid(True)
+plt.show()
+
