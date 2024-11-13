@@ -1,0 +1,63 @@
+# Convolutional Neural Network (CNN) for MNIST classification
+
+import tensorflow as tf
+from tensorflow.keras import datasets, layers, models
+import matplotlib.pyplot as plt
+
+# 1. Load and preprocess data
+(train_images, train_labels), (test_images, test_labels) = datasets.mnist.load_data()
+
+# Pixel values were not normalized.
+# Modification: Normalize pixel values to the range [0, 1] for better training stability
+train_images = train_images.reshape(train_images.shape[0], 28, 28, 1).astype('float32') / 255  # Normalize pixel values
+test_images = test_images.reshape(test_images.shape[0], 28, 28, 1).astype('float32') / 255  # Normalize pixel values
+
+# 2. Define the CNN model
+model = models.Sequential([
+    layers.Conv2D(32, (3, 3), activation='relu', input_shape=(28, 28, 1)),
+    layers.MaxPooling2D((2, 2)),
+    
+    # No dropout layer for regularization.
+    # Modification: Add a Dropout layer to prevent overfitting
+    layers.Conv2D(64, (3, 3), activation='relu'),
+    layers.MaxPooling2D((2, 2)),
+    
+    #Modification: Introduce Dropout layer after second Conv2D and MaxPooling layers
+    layers.Dropout(0.25),  # Dropout layer added with 25% rate
+    
+    layers.Conv2D(64, (3, 3), activation='relu'),
+    layers.Flatten(),
+    layers.Dense(64, activation='relu'),
+    
+    # The output layer used softmax activation.
+    # Modification: No change here but commented for clarification.
+    # **Clarification**: Output layer uses `softmax` for multi-class classification
+    layers.Dense(10, activation='softmax')  # Output layer for 10 classes (digits 0-9)
+])
+
+# 3. Compile the model with Adam optimizer and sparse categorical crossentropy loss
+model.compile(optimizer='adam', loss='sparse_categorical_crossentropy', metrics=['accuracy'])
+
+# 4. Train the model
+history = model.fit(train_images, train_labels, epochs=5, validation_data=(test_images, test_labels))
+
+# 5. Evaluate the model
+test_loss, test_acc = model.evaluate(test_images, test_labels)
+print(f"Test accuracy: {test_acc}")
+
+# 6. Plot the training and validation accuracy
+plt.plot(history.history['accuracy'], label='accuracy')  # Training accuracy
+plt.plot(history.history['val_accuracy'], label='val_accuracy')  # Validation accuracy
+plt.xlabel('Epoch')
+plt.ylabel('Accuracy')
+plt.legend(['Train', 'Test'], loc='upper left')
+plt.show()
+
+# 7. Plot the training and validation loss
+plt.plot(history.history['loss'], label='loss')  # Training loss
+plt.plot(history.history['val_loss'], label='val_loss')  # Validation loss
+plt.title('Model loss')
+plt.xlabel('Epoch')
+plt.ylabel('Loss')
+plt.legend(['Train', 'Test'], loc='upper left')
+plt.show()
